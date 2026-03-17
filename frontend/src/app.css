@@ -2,14 +2,13 @@
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
-  --border: #e5e4e7;
+  --border: #f0f0f0;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --shadow: rgba(0, 0, 0, 0.1);
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -30,62 +29,57 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-#app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
+/* Individual classes: */
+header {
   display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}}
+  justify-content: space-between;
+  background-color: var(--border);
+}
+
+.main_container {
+  background-color: var(--border);
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  border-radius: 30px;
+  margin: 0.75rem 0.25rem;
+  padding: 0.25rem 0.75rem;
+  box-shadow: 5px 5px 0px var(--shadow);
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--accent);
+}
+
+button:hover {
+    transform: scale(102%);
+    font-weight: 550;
+    border: 2px solid var(--borderColor);
+}
+
+button:active {
+    box-shadow: var(--borderColor) 2px 2px 0 0;
+    transform: translate(2px, 2px);
+}
+
+button svg {
+    overflow: visible;
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.mode_toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  color: var(--accent);
+}
+
+.viewbox{
+  border: 1px solid black;
+}
