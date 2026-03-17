@@ -3,7 +3,8 @@
     "allow": [
       "Bash(conda run:*)",
       "Bash(node:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }
