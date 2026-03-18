@@ -22,13 +22,13 @@
     let notes = $state("");
 
     // Edit existing subject form
-    let edit_last_name = $state("");
-    let edit_first_name = $state("");
-    let edit_sex = $state("");
-    let edit_dob = $state("");
-    let edit_email = $state("");
-    let edit_phone = $state("");
-    let edit_notes = $state("");
+    let edit_last_name = $state(null);
+    let edit_first_name = $state(null);
+    let edit_sex = $state(null);
+    let edit_dob = $state(null);
+    let edit_email = $state(null);
+    let edit_phone = $state(null);
+    let edit_notes = $state(null);
 
     import { onMount } from "svelte";
     import { formatDate, createSubject, updateSubject, deleteSubject } from "../lib/services.js";
@@ -56,9 +56,18 @@
     }
 
     //This is fired when the submit edit existing subject button is clicked
-    function handleEditSubject() {
+    async function handleEditSubject() {
         if (!window.confirm(`Are you sure you want to make these edits? They cannot be undone.`)) return;
-        statusMessage = "You've made a terrible mistake";
+        const raw = { first_name: edit_first_name, last_name: edit_last_name, sex: edit_sex, dob: edit_dob, email: edit_email, phone: edit_phone, notes: edit_notes };
+        const updates = Object.fromEntries(Object.entries(raw).filter(([, v]) => v !== null && v !== ""));
+        try {
+            await updateSubject(editingSubject, updates);
+            statusMessage = "Subject updated";
+        } catch (e) {
+            statusMessage = `Update failed: ${e.message}`;
+        } finally {
+            collapseCard();
+        }
     }
 
     onMount(() => {
@@ -155,7 +164,8 @@
 
                         <div class="form-element" id="edit-sex-container">
                             <label for="edit-sex">Sex:</label>
-                            <select id="edit-sex" bind:value={edit_first_name}>
+                            <select id="edit-sex" bind:value={edit_sex}>
+                                <option value={null}>--</option>
                                 <option value="F">F</option>
                                 <option value="M">M</option>
                                 <option value="Undeclared">Undeclared</option>

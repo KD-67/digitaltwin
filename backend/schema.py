@@ -164,6 +164,7 @@ class Mutation:
 
         # Rewrite profile.json
         profile_path = os.path.join(rawdata_root, subject_id, "profile.json")
+        os.makedirs(os.path.dirname(profile_path), exist_ok=True)
         if os.path.isfile(profile_path):
             with open(profile_path, "r") as f:
                 profile = json.load(f)

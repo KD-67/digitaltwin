@@ -26,9 +26,10 @@ export async function createSubject({ first_name, last_name, sex, dob, email, ph
     return subject_id;
 }
 
-export async function updateSubject(subject_id, { first_name, last_name, sex, dob, email, phone, notes }) {
+export async function updateSubject(subject_id, updates) {
+    const { first_name, last_name, sex, dob, email, phone, notes } = updates;
     await apiUpdateSubject(subject_id, { firstName: first_name, lastName: last_name, sex, dob, email, phone, notes });
-    storeUpdateSubject(subject_id, { first_name, last_name, sex, dob, email, phone, notes });
+    storeUpdateSubject(subject_id, updates);
 }
 
 export async function deleteSubject(subject_id) {
