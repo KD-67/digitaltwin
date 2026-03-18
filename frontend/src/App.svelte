@@ -4,7 +4,7 @@
 
   // Svelte components:
   import Home from './components/home.svelte';
-  import Computation from './components/computation.svelte';
+  import Pipeline from './components/pipeline.svelte';
   import Acquisition from './components/acquisition.svelte';
   import Management from './components/management.svelte';
   import Analysis from './components/analysis.svelte';
@@ -41,7 +41,7 @@
       <a class="nav-link" href="#home">Home</a>
 
       <div class="dropdown">
-        <a class="nav-link" id="nav-comp-dropdown" href="#computation">Computation</a>
+        <a class="nav-link" id="nav-comp-dropdown" href="#pipeline">Pipeline</a>
         <div id="dropdown-menu">
           <a class="dropdown-content" href="#acquisition">Aquisition</a>
           <a class="dropdown-content" href="#management">Management</a>
@@ -56,14 +56,10 @@
       <a class="nav-link" href="#help">Help</a>
     </nav>
   </header>
-
-  <h1>Welcome</h1>
-  <p>loading...</p>
-
   {#if currentPage == "home"}
   <Home />
-  {:else if currentPage == "computation"}
-  <Computation />
+  {:else if currentPage == "pipeline"}
+  <Pipeline />
   {:else if currentPage == "acquisition"}
   <Acquisition />
   {:else if currentPage == "management"}

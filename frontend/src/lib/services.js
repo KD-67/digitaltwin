@@ -11,6 +11,12 @@ import {
     storeAddSubject, storeUpdateSubject, storeRemoveSubject,
 } from './stores.svelte.js';
 
+// ── Utilities ────────────────────────────────────────────────────────────────
+
+export function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString(undefined, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 
 // ── Subjects ──────────────────────────────────────────────────────────────────
 

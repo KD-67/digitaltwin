@@ -1,7 +1,7 @@
 <script></script>
 
 <main>
-    <h2>Architecture</h2>
+        <h2>Architecture</h2>
     <p>
         I think the structure should be as follows:
     </p>

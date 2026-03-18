@@ -11,19 +11,23 @@ from strawberry.types import Info
 from backend.startup.database_logistics import get_connection
 
 
+# GraphQL type returned by subject queries and mutations.
+# subject_id follows the pattern subj_NNN (e.g. subj_001).
 @strawberry.type
 class Subject:
     subject_id: str
     first_name: Optional[str]
     last_name: Optional[str]
     sex: Optional[str]
-    dob: Optional[str]
+    dob: Optional[str]           # ISO date string, e.g. "1990-05-20"
     email: Optional[str]
     phone: Optional[str]
     notes: Optional[str]
-    created_at: Optional[str]
+    created_at: Optional[str]    # UTC ISO-8601 timestamp
 
 
+# Input type for create/update mutations.
+# All fields are optional so callers only send what they want to set.
 @strawberry.input
 class SubjectInput:
     first_name: Optional[str] = None
@@ -36,6 +40,7 @@ class SubjectInput:
 
 
 def _row_to_subject(row) -> Subject:
+    """Convert a sqlite3.Row from the subjects table into a Subject object."""
     return Subject(
         subject_id = row["subject_id"],
         first_name = row["first_name"],
@@ -53,6 +58,10 @@ def _row_to_subject(row) -> Subject:
 class Query:
     @strawberry.field
     def subjects(self, info: Info, subject_id: Optional[str] = None) -> List[Subject]:
+        """
+        Return all subjects, or a single subject if subject_id is provided.
+        db_path is injected via the Strawberry context.
+        """
         db_path = info.context["db_path"]
         with get_connection(db_path) as conn:
             if subject_id:
@@ -68,6 +77,17 @@ class Query:
 class Mutation:
     @strawberry.mutation
     def create_subject(self, info: Info, input: SubjectInput) -> Subject:
+        """
+        Create a new subject record.
+
+        Steps:
+          1. Determine the next available subj_NNN id by inspecting both the
+             DB and the rawdata filesystem (so gaps from manual folder creation
+             are avoided).
+          2. Create the subject's directory under rawdata_root and write a
+             profile.json snapshot of all fields.
+          3. Insert a row into the subjects table and return the new Subject.
+        """
         db_path      = info.context["db_path"]
         rawdata_root = info.context["rawdata_root"]
 
@@ -121,6 +141,13 @@ class Mutation:
 
     @strawberry.mutation
     def update_subject(self, info: Info, subject_id: str, input: SubjectInput) -> Subject:
+        """
+        Update an existing subject's fields.
+
+        Only fields explicitly set in SubjectInput (i.e. not None) are written,
+        so callers can do partial updates without overwriting untouched fields.
+        The profile.json on disk is rewritten to stay in sync with the DB.
+        """
         db_path      = info.context["db_path"]
         rawdata_root = info.context["rawdata_root"]
 
@@ -152,6 +179,11 @@ class Mutation:
 
     @strawberry.mutation
     def delete_subject(self, info: Info, subject_id: str) -> bool:
+        """
+        Soft-delete a subject by moving their rawdata folder to
+        rawdata_root/deleted_subjects/ instead of permanently removing it,
+        then remove the DB row.  Returns True on success.
+        """
         db_path      = info.context["db_path"]
         rawdata_root = info.context["rawdata_root"]
 

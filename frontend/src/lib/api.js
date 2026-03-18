@@ -2,7 +2,7 @@
 // All fetch functions return snake_case objects; camelCase normalisation happens here.
 // Components import these instead of embedding query strings inline.
 
-import { gql, gqlUpload } from "./gql.js";
+import { gql } from "./gql.js";
 
 
 // ── Read functions ────────────────────────────────────────────────────────────
