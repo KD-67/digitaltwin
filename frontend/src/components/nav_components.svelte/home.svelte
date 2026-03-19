@@ -1,5 +1,5 @@
 <script>
-    import hdtConcept from "../assets/HDT_concept.png";
+    import hdtConcept from "../../assets/HDT_concept.png";
 </script>
 
 <main>

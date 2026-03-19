@@ -3,18 +3,19 @@
   let currentPage = window.location.hash.slice(1) || "home";
 
   // Svelte components:
-  import Home from './components/home.svelte';
-  import Pipeline from './components/pipeline.svelte';
-  import Acquisition from './components/acquisition.svelte';
-  import Management from './components/management.svelte';
-  import Analysis from './components/analysis.svelte';
-  import Prediction from './components/prediction.svelte';
-  import Interpretation from './components/interpretation.svelte';
-  import Sandbox from './components/sandbox.svelte';
-  import Architecture from './components/architecture.svelte';
-  import Help from './components/help.svelte';
-  import Subjects from './components/subjects.svelte';
-  import Data from './components/data.svelte';
+  import Home from './components/nav_components.svelte/home.svelte';
+  import Pipeline from './components/nav_components.svelte/pipeline.svelte';
+  import Acquisition from './components/pipeline_components/acquisition.svelte';
+  import Management from './components/pipeline_components/management.svelte';
+  import Analysis from './components/pipeline_components/analysis.svelte';
+  import Prediction from './components/pipeline_components/prediction.svelte';
+  import Interpretation from './components/pipeline_components/interpretation.svelte';
+  import Sandbox from './components/nav_components.svelte/sandbox_components/sandbox.svelte';
+  import TrajectorySandbox from './components/nav_components.svelte/sandbox_components/trajectory_sandbox.svelte';
+  import Architecture from './components/nav_components.svelte/architecture.svelte';
+  import Help from './components/nav_components.svelte/help.svelte';
+  import Subjects from './components/pipeline_components/acquisition_components/subjects.svelte';
+  import Data from './components/pipeline_components/acquisition_components/data.svelte';
 
   // Assets:
   import LogoIcon from '/src/assets/logo_icon.svg';
@@ -72,6 +73,8 @@
   <Interpretation />
   {:else if currentPage == "sandbox"}
   <Sandbox />
+  {:else if currentPage == "trajectory_sandbox"}
+  <TrajectorySandbox />
   {:else if currentPage == "architecture"}
   <Architecture />
   {:else if currentPage == "help"}

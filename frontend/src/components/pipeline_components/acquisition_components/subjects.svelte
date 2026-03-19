@@ -1,10 +1,10 @@
 <script>
-    import ViewIcon from "../assets/view_icon.svg?raw";
-    import AddIcon from "../assets/add_icon.svg?raw";
-    import EditIcon from "../assets/edit_icon.svg?raw";
-    import DeleteIcon from "../assets/delete_icon.svg?raw";
-    import GenericUserIcon from "../assets/generic_user_icon.svg?raw";
-    import CancelIcon from "../assets/cancel_icon.svg?raw";
+    import ViewIcon from "../../../assets/view_icon.svg?raw";
+    import AddIcon from "../../../assets/add_icon.svg?raw";
+    import EditIcon from "../../../assets/edit_icon.svg?raw";
+    import DeleteIcon from "../../../assets/delete_icon.svg?raw";
+    import GenericUserIcon from "../../../assets/generic_user_icon.svg?raw";
+    import CancelIcon from "../../../assets/cancel_icon.svg?raw";
 
     let statusMessage = $state("");
     let mode = $state("view");
@@ -31,8 +31,8 @@
     let edit_notes = $state(null);
 
     import { onMount } from "svelte";
-    import { formatDate, createSubject, updateSubject, deleteSubject } from "../lib/services.js";
-    import { appState, ensureSubjectsLoaded } from "../lib/stores.svelte.js";
+    import { formatDate, createSubject, updateSubject, deleteSubject } from "../../../lib/services.js";
+    import { appState, ensureSubjectsLoaded } from "../../../lib/stores.svelte.js";
 
     // INTERFACE FUNCTIONALITY:
     function collapseCard() {
