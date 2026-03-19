@@ -72,7 +72,6 @@ class SubjectQuery:
                 rows = conn.execute("SELECT * FROM subjects").fetchall()
         return [_row_to_subject(r) for r in rows]
 
-
 @strawberry.type
 class SubjectMutation:
     @strawberry.mutation

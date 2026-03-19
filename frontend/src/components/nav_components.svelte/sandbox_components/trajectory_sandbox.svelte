@@ -1,5 +1,5 @@
 <script>
-    import SandboxChart from "./sandbox_chart.svelte";
+    import SandboxChart from "./sandbox_chart_components/sandbox_chart.svelte";
 
 </script>
 
