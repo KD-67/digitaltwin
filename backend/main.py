@@ -8,13 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
 from backend.schema import schema
 
-from backend.startup.database_logistics import init_db, sync_subjects
+from backend.startup.database_logistics import init_db, sync_subjects, sync_markers
 
 BASE_DIR        = os.path.dirname(os.path.abspath(__file__))                           # resolves to: "c:\Users\kevin\proj\digitaltwin\backend"
 REPO_ROOT       = os.path.dirname(BASE_DIR)                                            # resolves to: "c:\Users\kevin\proj\digitaltwin"
 DATA_DIR        = os.path.join(REPO_ROOT, "data")                                      # resolves to: "c:\Users\kevin\proj\digitaltwin\data"
 DB_PATH         = os.path.join(DATA_DIR, "HDT.db")                                     # resolves to: "c:\Users\kevin\proj\digitaltwin\data\HDT.db"
-RAWDATA_ROOT    = os.path.join(DATA_DIR, "rawdata")                                   # resolves to: "c:\Users\kevin\proj\digitaltwin\data\rawdata"
+RAWDATA_ROOT    = os.path.join(DATA_DIR, "rawdata")                                    # resolves to: "c:\Users\kevin\proj\digitaltwin\data\rawdata"
+UTILITIES_ROOT  = os.path.join(DATA_DIR, "utilities")                                  # resolves to: "c:\Users\kevin\proj\digitaltwin\data\utilities"
 
 app = FastAPI()
 
@@ -41,6 +42,7 @@ def startup ():
     # sync data sources into database 
     init_db(DB_PATH)
     sync_subjects(DB_PATH, RAWDATA_ROOT)
+    sync_markers(DB_PATH, UTILITIES_ROOT)
 
     #store shared paths and state on app.state
     app.state.db_path         = DB_PATH

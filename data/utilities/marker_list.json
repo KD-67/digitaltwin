@@ -1,0 +1,10 @@
+[
+  {
+    "marker_id": "mark_001",
+    "marker_name": "Resting Heart Rate",
+    "description": "Number of heartbeats per minute while at rest",
+    "unit": "bpm",
+    "volatility_class": "medium",
+    "created_at": "2026-01-01T00:00:00+00:00"
+  }
+]

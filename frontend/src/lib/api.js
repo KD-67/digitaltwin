@@ -70,3 +70,58 @@ export async function deleteSubject(subjectId) {
         { id: subjectId }
     );
 }
+
+// ── Markers ───────────────────────────────────────────────────────────────────
+
+const MARKER_FIELD_MAP = {
+    marker_id:        'markerId',
+    marker_name:      'markerName',
+    description:      'description',
+    unit:             'unit',
+    volatility_class: 'volatilityClass',
+    created_at:       'createdAt',
+};
+
+const ALL_MARKER_FIELDS = ['marker_id', 'marker_name', 'description', 'unit', 'volatility_class', 'created_at'];
+
+export async function fetchMarkerData(markerId = null, fields = ALL_MARKER_FIELDS) {
+    const gqlFields = fields.map(f => MARKER_FIELD_MAP[f]).join(' ');
+    function mapObj(obj) {
+        const result = {};
+        for (const f of fields) result[f] = obj[MARKER_FIELD_MAP[f]];
+        return result;
+    }
+    if (markerId === null) {
+        const data = await gql(`query { markers { ${gqlFields} } }`);
+        return data.markers.map(mapObj);
+    } else {
+        const data = await gql(
+            `query($id: String!) { markers(markerId: $id) { ${gqlFields} } }`,
+            { id: markerId }
+        );
+        return data.markers.length ? mapObj(data.markers[0]) : null;
+    }
+}
+
+/** Returns marker_id string */
+export async function createMarker(input) {
+    const data = await gql(
+        `mutation($input: MarkerInput!) { createMarker(input: $input) { markerId } }`,
+        { input }
+    );
+    return data.createMarker.markerId;
+}
+
+export async function updateMarker(markerId, input) {
+    await gql(
+        `mutation($id: String!, $input: MarkerInput!) { updateMarker(markerId: $id, input: $input) { markerId } }`,
+        { id: markerId, input }
+    );
+}
+
+export async function deleteMarker(markerId) {
+    await gql(
+        `mutation($id: String!) { deleteMarker(markerId: $id) }`,
+        { id: markerId }
+    );
+}

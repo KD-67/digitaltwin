@@ -22,6 +22,18 @@ def init_db (db_path: str) -> None:
                 created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Table 2: Markers
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS markers (
+                id               INTEGER PRIMARY KEY,
+                marker_id        TEXT UNIQUE,
+                marker_name      TEXT,
+                description      TEXT,
+                unit             TEXT,
+                volatility_class TEXT,
+                created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
     
 # Opens connection to the SQLite db defined at db_path. sqlite.row makes columns accessible by name, not just by index position
 def get_connection(db_path: str) -> sqlite3.Connection:
@@ -79,5 +91,51 @@ def sync_subjects(db_path: str, rawdata_root: str):
         for row in rows:
             if row["subject_id"] not in live_ids:
                 conn.execute("DELETE FROM subjects WHERE subject_id = ?", (row["subject_id"],))
+
+        conn.commit()
+
+
+# Reads marker_list.json and upserts each marker into the markers table
+def sync_markers(db_path: str, utilities_root: str):
+    os.makedirs(utilities_root, exist_ok=True)
+    marker_list_path = os.path.join(utilities_root, "marker_list.json")
+    if not os.path.isfile(marker_list_path):
+        return
+
+    with open(marker_list_path, "r") as f:
+        markers = json.load(f)
+
+    live_ids = set()
+    with get_connection(db_path) as conn:
+        for p in markers:
+            marker_id = p.get("marker_id")
+            if not marker_id:
+                continue
+            live_ids.add(marker_id)
+            conn.execute(
+                """
+                INSERT INTO markers (marker_id, marker_name, description, unit, volatility_class, created_at)
+                VALUES (:marker_id, :marker_name, :description, :unit, :volatility_class, :created_at)
+                ON CONFLICT(marker_id) DO UPDATE SET
+                    marker_name      = excluded.marker_name,
+                    description      = excluded.description,
+                    unit             = excluded.unit,
+                    volatility_class = excluded.volatility_class
+                """,
+                {
+                    "marker_id":        marker_id,
+                    "marker_name":      p.get("marker_name"),
+                    "description":      p.get("description"),
+                    "unit":             p.get("unit"),
+                    "volatility_class": p.get("volatility_class"),
+                    "created_at":       p.get("created_at", ""),
+                },
+            )
+
+        # Remove rows no longer present in marker_list.json
+        rows = conn.execute("SELECT marker_id FROM markers").fetchall()
+        for row in rows:
+            if row["marker_id"] not in live_ids:
+                conn.execute("DELETE FROM markers WHERE marker_id = ?", (row["marker_id"],))
 
         conn.commit()
