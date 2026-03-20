@@ -182,10 +182,19 @@ class SubjectMutation:
         """
         Soft-delete a subject by moving their rawdata folder to
         rawdata_root/deleted_subjects/ instead of permanently removing it,
-        then remove the DB row.  Returns True on success.
+        then remove the DB row.
+        Blocked if any measurements exist for this subject.
+        Returns True on success.
         """
         db_path      = info.context["db_path"]
         rawdata_root = info.context["rawdata_root"]
+
+        with get_connection(db_path) as conn:
+            count = conn.execute(
+                "SELECT COUNT(*) FROM measurements WHERE subject_id = ?", (subject_id,)
+            ).fetchone()[0]
+        if count > 0:
+            raise Exception(f"Cannot delete — {count} measurement(s) exist for this subject. Remove all measurements first.")
 
         # Move folder to deleted_subjects/
         src = os.path.join(rawdata_root, subject_id)

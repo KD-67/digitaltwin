@@ -1,5 +1,6 @@
-# Checks if the SQLite database exists and has all required tables. If yes - move on, if no - create it. 
+# Checks if the SQLite database exists and has all required tables. If yes - move on, if no - create it.
 
+import csv
 import sqlite3
 import os
 import json
@@ -31,10 +32,39 @@ def init_db (db_path: str) -> None:
                 description      TEXT,
                 unit             TEXT,
                 volatility_class TEXT,
+                storage_type     TEXT DEFAULT 'sparse',
                 created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
-    
+        # Migration: add storage_type column to markers if it doesn't exist yet
+        existing_cols = [row[1] for row in conn.execute("PRAGMA table_info(markers)").fetchall()]
+        if "storage_type" not in existing_cols:
+            conn.execute("ALTER TABLE markers ADD COLUMN storage_type TEXT DEFAULT 'sparse'")
+
+        # Table 3: Measurements
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS measurements (
+                id          INTEGER PRIMARY KEY,
+                subject_id  TEXT NOT NULL REFERENCES subjects(subject_id),
+                marker_id   TEXT NOT NULL REFERENCES markers(marker_id),
+                measured_at TEXT NOT NULL,
+                value       TEXT NOT NULL,
+                quality     TEXT DEFAULT 'good',
+                notes       TEXT,
+                created_at  TEXT DEFAULT (datetime('now')),
+                UNIQUE(subject_id, marker_id, measured_at)
+            )
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_meas_subj_marker_time
+            ON measurements(subject_id, marker_id, measured_at)
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_meas_marker_time
+            ON measurements(marker_id, measured_at)
+        """)
+        conn.commit()
+
 # Opens connection to the SQLite db defined at db_path. sqlite.row makes columns accessible by name, not just by index position
 def get_connection(db_path: str) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
@@ -114,13 +144,14 @@ def sync_markers(db_path: str, utilities_root: str):
             live_ids.add(marker_id)
             conn.execute(
                 """
-                INSERT INTO markers (marker_id, marker_name, description, unit, volatility_class, created_at)
-                VALUES (:marker_id, :marker_name, :description, :unit, :volatility_class, :created_at)
+                INSERT INTO markers (marker_id, marker_name, description, unit, volatility_class, storage_type, created_at)
+                VALUES (:marker_id, :marker_name, :description, :unit, :volatility_class, :storage_type, :created_at)
                 ON CONFLICT(marker_id) DO UPDATE SET
                     marker_name      = excluded.marker_name,
                     description      = excluded.description,
                     unit             = excluded.unit,
-                    volatility_class = excluded.volatility_class
+                    volatility_class = excluded.volatility_class,
+                    storage_type     = excluded.storage_type
                 """,
                 {
                     "marker_id":        marker_id,
@@ -128,6 +159,7 @@ def sync_markers(db_path: str, utilities_root: str):
                     "description":      p.get("description"),
                     "unit":             p.get("unit"),
                     "volatility_class": p.get("volatility_class"),
+                    "storage_type":     p.get("storage_type", "sparse"),
                     "created_at":       p.get("created_at", ""),
                 },
             )
@@ -138,4 +170,42 @@ def sync_markers(db_path: str, utilities_root: str):
             if row["marker_id"] not in live_ids:
                 conn.execute("DELETE FROM markers WHERE marker_id = ?", (row["marker_id"],))
 
+        conn.commit()
+
+
+# Scans sparse_data CSV files under each subject directory and upserts rows into the measurements table
+def sync_measurements(db_path: str, rawdata_root: str):
+    if not os.path.isdir(rawdata_root):
+        return
+
+    with get_connection(db_path) as conn:
+        for entry in os.listdir(rawdata_root):
+            if entry == "deleted_subjects":
+                continue
+            sparse_dir = os.path.join(rawdata_root, entry, "measurements", "sparse_data")
+            if not os.path.isdir(sparse_dir):
+                continue
+            for csv_file in os.listdir(sparse_dir):
+                if not csv_file.endswith(".csv"):
+                    continue
+                marker_id = csv_file[:-4]  # strip .csv suffix
+                csv_path = os.path.join(sparse_dir, csv_file)
+                with open(csv_path, "r", newline="") as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        conn.execute(
+                            """
+                            INSERT INTO measurements (subject_id, marker_id, measured_at, value, quality, notes)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                            ON CONFLICT(subject_id, marker_id, measured_at) DO NOTHING
+                            """,
+                            (
+                                entry,
+                                marker_id,
+                                row.get("measured_at", ""),
+                                row.get("value", ""),
+                                row.get("quality", "good"),
+                                row.get("notes", ""),
+                            ),
+                        )
         conn.commit()

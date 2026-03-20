@@ -12,6 +12,7 @@
   import Interpretation from './components/pipeline_components/interpretation.svelte';
   import Sandbox from './components/nav_components.svelte/sandbox_components/sandbox.svelte';
   import TrajectorySandbox from './components/nav_components.svelte/sandbox_components/trajectory_sandbox.svelte';
+  import TestSandbox from './components/nav_components.svelte/sandbox_components/test_sandbox.svelte';
   import Architecture from './components/nav_components.svelte/architecture.svelte';
   import Help from './components/nav_components.svelte/help.svelte';
   import Subjects from './components/pipeline_components/acquisition_components/subjects.svelte';
@@ -56,6 +57,7 @@
       <a class="nav-link" href="#architecture">Architecture</a>
       <a class="nav-link" href="#help">Help</a>
     </nav>
+
   </header>
   {#if currentPage == "home"}
   <Home />
@@ -75,6 +77,8 @@
   <Sandbox />
   {:else if currentPage == "trajectory_sandbox"}
   <TrajectorySandbox />
+  {:else if currentPage == "test_sandbox"}
+  <TestSandbox />
   {:else if currentPage == "architecture"}
   <Architecture />
   {:else if currentPage == "help"}

@@ -1,5 +1,5 @@
 <script>
-    import TrajectorySandboxChart from "./trajectory_sandbox_chart_components/sandbox_chart.svelte";
+    import TestSandboxChart from "./test_sandbox_chart_components/sandbox_chart.svelte";
 
 </script>
 
@@ -13,7 +13,7 @@
         <div class="subcontainer" id="data-vis-chart-container">
             <div class="data-vis-chart-title-container">Data Vis Chart</div>
             <div id="data-vis-chart">
-                <TrajectorySandboxChart />
+                <TestSandboxChart />
             </div>    
         </div>
         <div class="subcontainer" id="data-manager-container"> data-manager-container

@@ -28,6 +28,7 @@ def _row_to_marker(row) -> "Marker":
         description      = row["description"],
         unit             = row["unit"],
         volatility_class = row["volatility_class"],
+        storage_type     = row["storage_type"],
         created_at       = row["created_at"],
     )
 
@@ -41,7 +42,8 @@ class Marker:
     description: Optional[str]
     unit: Optional[str]
     volatility_class: Optional[str]
-    created_at: Optional[str]    # UTC ISO-8601 timestamp
+    storage_type: Optional[str]      # 'sparse' | 'continuous'
+    created_at: Optional[str]        # UTC ISO-8601 timestamp
 
 
 @strawberry.input
@@ -50,6 +52,7 @@ class MarkerInput:
     description: Optional[str] = None
     unit: Optional[str] = None
     volatility_class: Optional[str] = None
+    storage_type: Optional[str] = None
 
 
 @strawberry.type
@@ -98,7 +101,8 @@ class MarkerMutation:
         next_n    = max(existing_nums, default=0) + 1
         marker_id = f"mark_{next_n:03d}"
 
-        created_at = datetime.now(timezone.utc).isoformat()
+        created_at   = datetime.now(timezone.utc).isoformat()
+        storage_type = input.storage_type or "sparse"
 
         entry = {
             "marker_id":        marker_id,
@@ -106,6 +110,7 @@ class MarkerMutation:
             "description":      input.description,
             "unit":             input.unit,
             "volatility_class": input.volatility_class,
+            "storage_type":     storage_type,
             "created_at":       created_at,
         }
         existing.append(entry)
@@ -113,10 +118,10 @@ class MarkerMutation:
 
         with get_connection(db_path) as conn:
             conn.execute(
-                """INSERT INTO markers (marker_id, marker_name, description, unit, volatility_class, created_at)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO markers (marker_id, marker_name, description, unit, volatility_class, storage_type, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (marker_id, input.marker_name, input.description,
-                 input.unit, input.volatility_class, created_at),
+                 input.unit, input.volatility_class, storage_type, created_at),
             )
             conn.commit()
             row = conn.execute("SELECT * FROM markers WHERE marker_id = ?", (marker_id,)).fetchone()
@@ -133,7 +138,7 @@ class MarkerMutation:
         db_path        = info.context["db_path"]
         utilities_root = os.path.join(os.path.dirname(info.context["rawdata_root"]), "utilities")
 
-        fields  = ["marker_name", "description", "unit", "volatility_class"]
+        fields  = ["marker_name", "description", "unit", "volatility_class", "storage_type"]
         updates = {f: getattr(input, f) for f in fields if getattr(input, f) is not None}
 
         if updates:
@@ -160,10 +165,18 @@ class MarkerMutation:
         """
         Soft-delete a marker by removing it from marker_list.json and appending
         it to deleted_marker_list.json, then removing the DB row.
+        Blocked if any measurements exist for this marker.
         Returns True on success.
         """
         db_path        = info.context["db_path"]
         utilities_root = os.path.join(os.path.dirname(info.context["rawdata_root"]), "utilities")
+
+        with get_connection(db_path) as conn:
+            count = conn.execute(
+                "SELECT COUNT(*) FROM measurements WHERE marker_id = ?", (marker_id,)
+            ).fetchone()[0]
+        if count > 0:
+            raise Exception(f"Cannot delete — {count} measurement(s) exist for this marker. Remove all measurements first.")
 
         list_path    = os.path.join(utilities_root, "marker_list.json")
         deleted_path = os.path.join(utilities_root, "deleted_marker_list.json")
@@ -182,31 +195,3 @@ class MarkerMutation:
             conn.commit()
 
         return True
-
-
-# MEASUREMENTS - individual measured instances of a marker
-@strawberry.type
-class Measurement:
-    marker_id: str
-    marker_name: str
-    subject_id: str
-    measured_at: str                      # UTC ISO-8601 timestamp
-    value: str
-    unit: str
-    quality: str
-    notes: str
-    created_at: str                       # UTC ISO-8601 timestamp
-    updated_at: Optional[str]             # UTC ISO-8601 timestamp
-
-@strawberry.input
-class MeasurementInput:
-    marker_id: Optional[str] = None
-    marker_name: Optional[str] = None
-    description: Optional[str] = None
-    subject_id: Optional[str] = None
-    measured_at: Optional[str] = None      # UTC ISO-8601 timestamp
-    value: Optional[str] = None
-    unit: Optional[str] = None
-    quality: Optional[str] = None
-    notes: Optional[str] = None
-    updated_at: Optional[str] = None       # UTC ISO-8601 timestamp

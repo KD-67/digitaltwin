@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
 from backend.schema import schema
 
-from backend.startup.database_logistics import init_db, sync_subjects, sync_markers
+from backend.startup.database_logistics import init_db, sync_subjects, sync_markers, sync_measurements
 
 BASE_DIR        = os.path.dirname(os.path.abspath(__file__))                           # resolves to: "c:\Users\kevin\proj\digitaltwin\backend"
 REPO_ROOT       = os.path.dirname(BASE_DIR)                                            # resolves to: "c:\Users\kevin\proj\digitaltwin"
@@ -43,6 +43,7 @@ def startup ():
     init_db(DB_PATH)
     sync_subjects(DB_PATH, RAWDATA_ROOT)
     sync_markers(DB_PATH, UTILITIES_ROOT)
+    sync_measurements(DB_PATH, RAWDATA_ROOT)
 
     #store shared paths and state on app.state
     app.state.db_path         = DB_PATH
