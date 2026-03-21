@@ -1,5 +1,6 @@
 <script>
     import TrajectorySandboxChart from "./trajectory_sandbox_chart_components/sandbox_chart.svelte";
+    import SandboxToolbox from "./sandbox_toolbox.svelte";
 
 </script>
 
@@ -8,7 +9,9 @@
 
     <div class="main-container">
         <div class="subcontainer" id="toolbox-container"> toolbox-container
-            <div id="toolbox"></div>
+            <div id="toolbox">
+                <SandboxToolbox />
+            </div>
         </div>
         <div class="subcontainer" id="data-vis-chart-container">
             <div class="data-vis-chart-title-container">Data Vis Chart</div>

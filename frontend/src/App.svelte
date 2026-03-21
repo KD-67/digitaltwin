@@ -88,7 +88,7 @@
   <Data />
   {:else if currentPage == "subjects"}
   <Subjects />
-  {:else if currentPage == "subject-detail"}
+  {:else if currentPage == "subject_detail"}
   <SubjectDetail />
   {/if}
 </main>

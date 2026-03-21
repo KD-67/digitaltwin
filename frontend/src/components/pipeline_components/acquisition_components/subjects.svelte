@@ -42,7 +42,7 @@
 
     function navigateToSubjectDetail(subject) {
         appState.selectedSubject = subject;
-        window.location.hash = 'subject-detail';
+        window.location.hash = 'subject_detail';
     }
 
     async function handleCardExpand(subject) {

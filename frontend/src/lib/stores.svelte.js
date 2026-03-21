@@ -11,6 +11,7 @@ export const appState = $state({
     markersLoaded: false,
     selectedSubject: null, // set before navigating to #subject-detail
     measurementsBySubject: {},  // { "subj_001": Measurement[], ... }  (lazy per-subject cache)
+    sandboxSubjectId: null,    // set when user submits subject selection in trajectory sandbox
 });
 
 // ── Subjects ──────────────────────────────────────────────────────────────────
