@@ -16,6 +16,7 @@
   import Architecture from './components/nav_components.svelte/architecture.svelte';
   import Help from './components/nav_components.svelte/help.svelte';
   import Subjects from './components/pipeline_components/acquisition_components/subjects.svelte';
+  import SubjectDetail from './components/pipeline_components/acquisition_components/subject_detail.svelte';
   import Data from './components/pipeline_components/acquisition_components/data.svelte';
 
   // Assets:
@@ -87,6 +88,8 @@
   <Data />
   {:else if currentPage == "subjects"}
   <Subjects />
+  {:else if currentPage == "subject-detail"}
+  <SubjectDetail />
   {/if}
 </main>
 

@@ -7,9 +7,8 @@
 </script>
 
 <svg {width} {height}>
-<g transform="translate(5 5)">
-    <rect x="0" y="0" height={height - 10} width={width - 10} fill="red" />
-    <circle cx="400" cy="200" r="25" fill="black"/>
+<g>
+
 </g> 
 </svg>
 

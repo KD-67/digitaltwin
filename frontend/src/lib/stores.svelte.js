@@ -1,14 +1,16 @@
-// Shared reactive store for subjects and markers.
-// Fetches the list exactly once per session; components call ensureXxxLoaded on mount.
+// Shared reactive store for subjects, markers, and measurements.
+// Fetches each list exactly once per session; components call ensureXxxLoaded on mount.
 // All mutations flow through store helpers so components never re-fetch.
 
-import { fetchSubjectData, fetchMarkerData } from './api.js';
+import { fetchSubjectData, fetchMarkerData, fetchMeasurementsBySubject } from './api.js';
 
 export const appState = $state({
-    subjects: [],         // full fields: subject_id, first_name, last_name, sex, dob, email, phone, notes, created_at
+    subjects: [],          // full fields: subject_id, first_name, last_name, sex, dob, email, phone, notes, created_at
     subjectsLoaded: false,
-    markers: [],          // full fields: marker_id, marker_name, description, unit, volatility_class, created_at
+    markers: [],           // full fields: marker_id, marker_name, description, unit, volatility_class, storage_type, created_at
     markersLoaded: false,
+    selectedSubject: null, // set before navigating to #subject-detail
+    measurementsBySubject: {},  // { "subj_001": Measurement[], ... }  (lazy per-subject cache)
 });
 
 // ── Subjects ──────────────────────────────────────────────────────────────────
@@ -67,4 +69,33 @@ export function storeUpdateMarker(id, updates) {
 
 export function storeRemoveMarker(id) {
     appState.markers = appState.markers.filter(m => m.marker_id !== id);
+}
+
+// ── Measurements ──────────────────────────────────────────────────────────────
+// measurementsBySubject is a plain object keyed by subject_id.
+// Presence of the key (even as an empty array) means that subject's data is loaded.
+
+const measurementsLoadingFor = new Set();  // non-reactive semaphore; just prevents duplicate fetches
+
+export async function ensureMeasurementsLoaded(subject_id) {
+    if (subject_id in appState.measurementsBySubject || measurementsLoadingFor.has(subject_id)) return;
+    measurementsLoadingFor.add(subject_id);
+    try {
+        const measurements = await fetchMeasurementsBySubject(subject_id);
+        appState.measurementsBySubject[subject_id] = measurements;
+    } finally {
+        measurementsLoadingFor.delete(subject_id);
+    }
+}
+
+export function storeAddMeasurement(subject_id, measurement) {
+    const current = appState.measurementsBySubject[subject_id] ?? [];
+    appState.measurementsBySubject[subject_id] = [measurement, ...current];
+}
+
+export function storeRemoveMeasurement(subject_id, marker_id, measured_at) {
+    const current = appState.measurementsBySubject[subject_id] ?? [];
+    appState.measurementsBySubject[subject_id] = current.filter(
+        m => !(m.marker_id === marker_id && m.measured_at === measured_at)
+    );
 }

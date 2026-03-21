@@ -5,7 +5,7 @@
 import { gql } from "./gql.js";
 
 
-// ── Read functions ────────────────────────────────────────────────────────────
+// ── Subjects ──────────────────────────────────────────────────────────────────
 
 const SUBJECT_FIELD_MAP = {
     subject_id: 'subjectId',
@@ -79,10 +79,11 @@ const MARKER_FIELD_MAP = {
     description:      'description',
     unit:             'unit',
     volatility_class: 'volatilityClass',
+    storage_type:     'storageType',
     created_at:       'createdAt',
 };
 
-const ALL_MARKER_FIELDS = ['marker_id', 'marker_name', 'description', 'unit', 'volatility_class', 'created_at'];
+const ALL_MARKER_FIELDS = ['marker_id', 'marker_name', 'description', 'unit', 'volatility_class', 'storage_type', 'created_at'];
 
 export async function fetchMarkerData(markerId = null, fields = ALL_MARKER_FIELDS) {
     const gqlFields = fields.map(f => MARKER_FIELD_MAP[f]).join(' ');
@@ -123,5 +124,56 @@ export async function deleteMarker(markerId) {
     await gql(
         `mutation($id: String!) { deleteMarker(markerId: $id) }`,
         { id: markerId }
+    );
+}
+
+// ── Measurements ──────────────────────────────────────────────────────────────
+
+const MEASUREMENT_FIELD_MAP = {
+    subject_id:  'subjectId',
+    marker_id:   'markerId',
+    measured_at: 'measuredAt',
+    value:       'value',
+    quality:     'quality',
+    notes:       'notes',
+    created_at:  'createdAt',
+};
+
+const ALL_MEASUREMENT_FIELDS = ['subject_id', 'marker_id', 'measured_at', 'value', 'quality', 'notes', 'created_at'];
+
+const MEASUREMENT_GQL_FIELDS = ALL_MEASUREMENT_FIELDS.map(f => MEASUREMENT_FIELD_MAP[f]).join(' ');
+
+function mapMeasurement(obj) {
+    const result = {};
+    for (const f of ALL_MEASUREMENT_FIELDS) result[f] = obj[MEASUREMENT_FIELD_MAP[f]];
+    return result;
+}
+
+export async function fetchMeasurementsBySubject(subject_id) {
+    const data = await gql(
+        `query($id: String!) { measurementsBySubject(subjectId: $id) { ${MEASUREMENT_GQL_FIELDS} } }`,
+        { id: subject_id }
+    );
+    return data.measurementsBySubject.map(mapMeasurement);
+}
+
+export async function addMeasurement({ subject_id, marker_id, measured_at, value, quality, notes }) {
+    const data = await gql(
+        `mutation($subjectId: String!, $markerId: String!, $measuredAt: String!, $value: String!, $quality: String, $notes: String) {
+            addMeasurement(subjectId: $subjectId, markerId: $markerId, measuredAt: $measuredAt, value: $value, quality: $quality, notes: $notes) {
+                ${MEASUREMENT_GQL_FIELDS}
+            }
+        }`,
+        { subjectId: subject_id, markerId: marker_id, measuredAt: measured_at, value, quality, notes }
+    );
+    return mapMeasurement(data.addMeasurement);
+}
+
+export async function deleteMeasurement(subject_id, marker_id, measured_at) {
+    await gql(
+        `mutation($subjectId: String!, $markerId: String!, $measuredAt: String!) {
+            deleteMeasurement(subjectId: $subjectId, markerId: $markerId, measuredAt: $measuredAt)
+        }`,
+        { subjectId: subject_id, markerId: marker_id, measuredAt: measured_at }
     );
 }

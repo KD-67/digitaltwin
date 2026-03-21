@@ -32,12 +32,38 @@
 
     import { onMount } from "svelte";
     import { formatDate, createSubject, updateSubject, deleteSubject } from "../../../lib/services.js";
-    import { appState, ensureSubjectsLoaded } from "../../../lib/stores.svelte.js";
+    import { appState, ensureSubjectsLoaded, ensureMarkersLoaded, ensureMeasurementsLoaded } from "../../../lib/stores.svelte.js";
 
     // INTERFACE FUNCTIONALITY:
     function collapseCard() {
         expandedSubject = null;
         editingSubject = null;
+    }
+
+    function navigateToSubjectDetail(subject) {
+        appState.selectedSubject = subject;
+        window.location.hash = 'subject-detail';
+    }
+
+    async function handleCardExpand(subject) {
+        collapseCard();
+        expandedSubject = subject.subject_id;
+        statusMessage = "card expanded";
+        // Lazy-load measurements for this subject to populate "Available Data" counts
+        await ensureMeasurementsLoaded(subject.subject_id);
+    }
+
+    function getMarkerCounts(subject_id) {
+        const measurements = appState.measurementsBySubject[subject_id] ?? [];
+        const counts = {};
+        for (const m of measurements) {
+            counts[m.marker_id] = (counts[m.marker_id] ?? 0) + 1;
+        }
+        return counts;
+    }
+
+    function getMarkerName(marker_id) {
+        return appState.markers.find(m => m.marker_id === marker_id)?.marker_name ?? marker_id;
     }
 
     // BACKEND FUNCTIONALITY:
@@ -72,6 +98,7 @@
 
     onMount(() => {
         ensureSubjectsLoaded();
+        ensureMarkersLoaded();
     })
 </script>
 
@@ -95,15 +122,13 @@
             <p>No subjects found</p>       
         {/if}
         {#each appState.subjects as s}
-            <div class="card" role="button" tabindex='0' onkeydown={(e) => e.stopPropagation()} 
+            <div class="card" role="button" tabindex='0' onkeydown={(e) => e.stopPropagation()}
                 onclick={() => {
                     if (expandedSubject === s.subject_id) {
                         collapseCard();
                         statusMessage = "card collapsed";
                     } else {
-                        collapseCard();
-                        expandedSubject = s.subject_id;
-                        statusMessage = "card expanded"
+                        handleCardExpand(s);
                     }
                 }}>
                 <div class="card-header-container">
@@ -113,6 +138,8 @@
                     <div class="card-title-container">{s.first_name} {s.last_name}</div>
                 </div>
                 <div class="card-actions-container">
+                    <button class="view-btn" title="View subject data" onclick={(e) => { e.stopPropagation(); navigateToSubjectDetail(s); }}>{@html ViewIcon}</button>
+
                     <button class="edit-btn" onclick={(e) => {
                         e.stopPropagation();
                         if (editingSubject === s.subject_id) {
@@ -141,9 +168,20 @@
                     </div>
                     <div class="subject-datasets-container">
                             <p class="subject-datasets-row" id="subject-datasets-row-header"><strong>Available Data</strong></p>
-                            <p class="subject-datasets-row"><strong>Marker1:</strong> 56</p>
-                            <p class="subject-datasets-row"><strong>Marker2:</strong> 12</p>
-                            <p class="subject-datasets-row"><strong>Marker3:</strong> 94</p>
+                            {#if !(s.subject_id in appState.measurementsBySubject)}
+                                <p class="subject-datasets-row">Loading…</p>
+                            {:else}
+                                {@const counts = getMarkerCounts(s.subject_id)}
+                                {#if Object.keys(counts).length === 0}
+                                    <p class="subject-datasets-row">No measurements yet</p>
+                                {:else}
+                                    {#each Object.entries(counts) as [marker_id, count]}
+                                        <p class="subject-datasets-row">
+                                            <strong>{getMarkerName(marker_id)}:</strong>&nbsp;{count} reading{count !== 1 ? 's' : ''}
+                                        </p>
+                                    {/each}
+                                {/if}
+                            {/if}
                     </div>
                 </div>    
                 {/if}

@@ -4,7 +4,7 @@
 </script>
 
 <main>
-    <h2>Test Sandbox</h2>
+    <h2>Trajectory Sandbox</h2>
 
     <div class="main-container">
         <div class="subcontainer" id="toolbox-container"> toolbox-container

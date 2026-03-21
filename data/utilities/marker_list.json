@@ -7,5 +7,14 @@
     "volatility_class": "medium",
     "storage_type": "sparse",
     "created_at": "2026-01-01T00:00:00+00:00"
+  },
+  {
+    "marker_id": "mark_002",
+    "marker_name": "VO2 max",
+    "description": "Oxygen consumption at maximum cardiovascular effort",
+    "unit": "ml/kg/min",
+    "volatility_class": "low",
+    "storage_type": "sparse",
+    "created_at": "2026-03-21T09:18:44.085932+00:00"
   }
 ]
