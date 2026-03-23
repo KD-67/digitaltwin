@@ -8,5 +8,6 @@
 <g>
     {#each yticks as tick}
         <line x1="0" x2={innerWidth} y1={yScale(tick)} y2={yScale(tick)} stroke="#cecece"/>
+        <text x="0" y={yScale(tick)} >{tick}</text>
     {/each}
 </g>
