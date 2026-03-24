@@ -3,6 +3,7 @@
     import SandboxToolbox from "./sandbox_toolbox.svelte";
     import SandboxDataManager from "./trajectory_sandbox_chart_components/sandbox_data_manager.svelte";
 
+    let selectedMeasurements = $state([]);
 </script>
 
 <main>
@@ -17,15 +18,15 @@
         <div class="subcontainer" id="data-vis-chart-container">
             <div class="data-vis-chart-title-container">Data Vis Chart</div>
             <div id="data-vis-chart">
-                <TrajectorySandboxChart />
-            </div>    
+                <TrajectorySandboxChart measurements={selectedMeasurements} />
+            </div>
         </div>
         <div class="subcontainer" id="data-manager-container"> data-manager-container
             <div id="data-manager">
-                <SandboxDataManager />
+                <SandboxDataManager onSelectionChange={(m) => selectedMeasurements = m} />
             </div>
         </div>
-        <div class="subcontainer" id="data-vis-table-container"> data-vis-table-container 
+        <div class="subcontainer" id="data-vis-table-container"> data-vis-table-container
             <div id="data-vis-table"></div>
         </div>
     </div>
