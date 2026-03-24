@@ -3,8 +3,25 @@
     import SandboxToolbox from "./sandbox_toolbox.svelte";
     import SandboxDataManager from "./sandbox_data_manager.svelte";
     import DataVisTable from "./data_vis_table.svelte";
+    import { normalizeHealthScores } from "../../../lib/api.js";
 
     let selectedMeasurements = $state([]);
+    let normalizedScores = $state({});
+    let submitError = $state(null);
+
+    async function handleParamsSubmit(params) {
+        submitError = null;
+        try {
+            const results = await normalizeHealthScores(selectedMeasurements, params.healthy_min, params.healthy_max);
+            const map = {};
+            for (const r of results) {
+                map[r.marker_id + '::' + r.measured_at] = r.h_score;
+            }
+            normalizedScores = map;
+        } catch (e) {
+            submitError = e.message;
+        }
+    }
 </script>
 
 <main>
@@ -13,13 +30,14 @@
     <div class="main-container">
         <div class="subcontainer" id="toolbox-container"> Toolbox
             <div id="toolbox">
-                <SandboxToolbox />
+                <SandboxToolbox onParamsSubmit={handleParamsSubmit} />
+                {#if submitError}<p style="color:red;font-size:0.8em">{submitError}</p>{/if}
             </div>
         </div>
         <div class="subcontainer" id="data-vis-chart-container">
             <div class="data-vis-chart-title-container">Data Vis Chart</div>
             <div id="data-vis-chart">
-                <TrajectorySandboxChart measurements={selectedMeasurements} />
+                <TrajectorySandboxChart measurements={selectedMeasurements} {normalizedScores} />
             </div>
         </div>
         <div class="subcontainer" id="data-manager-container"> Data Manager
@@ -29,7 +47,7 @@
         </div>
         <div class="subcontainer" id="data-vis-table-container"> Data Table
             <div id="data-vis-table">
-                <DataVisTable measurements={selectedMeasurements} />
+                <DataVisTable measurements={selectedMeasurements} {normalizedScores} />
             </div>
         </div>
     </div>

@@ -177,3 +177,27 @@ export async function deleteMeasurement(subject_id, marker_id, measured_at) {
         { subjectId: subject_id, markerId: marker_id, measuredAt: measured_at }
     );
 }
+
+// ── Analysis ──────────────────────────────────────────────────────────────────
+
+export async function normalizeHealthScores(measurements, healthy_min, healthy_max) {
+    const measurementsInput = measurements.map(m => ({
+        markerId: m.marker_id,
+        measuredAt: m.measured_at,
+        value: m.value,
+    }));
+    const data = await gql(
+        `query($measurements: [RawMeasurementInput!]!, $healthyMin: Float!, $healthyMax: Float!) {
+            normalizeHealthScores(measurements: $measurements, healthyMin: $healthyMin, healthyMax: $healthyMax) {
+                markerId measuredAt value hScore
+            }
+        }`,
+        { measurements: measurementsInput, healthyMin: healthy_min, healthyMax: healthy_max }
+    );
+    return data.normalizeHealthScores.map(r => ({
+        marker_id: r.markerId,
+        measured_at: r.measuredAt,
+        value: r.value,
+        h_score: r.hScore,
+    }));
+}

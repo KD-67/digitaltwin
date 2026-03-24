@@ -2,7 +2,7 @@
     import { appState, ensureMarkersLoaded } from '../../../lib/stores.svelte';
     import { onMount } from 'svelte';
 
-    let { measurements } = $props();
+    let { measurements, normalizedScores = {} } = $props();
 
     onMount(() => ensureMarkersLoaded());
 
@@ -27,6 +27,7 @@
                 <td>{markerNameById[m.marker_id] ?? m.marker_id}</td>
                 <td>{m.value}</td>
                 <td>{m.measured_at}</td>
+                <td>{normalizedScores[m.marker_id + '::' + m.measured_at] ?? ''}</td>
             </tr>
             {/each}
         </tbody>

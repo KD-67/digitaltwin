@@ -5,7 +5,7 @@
     import Yaxis from './yaxis.svelte';
     import Tooltip from './tooltip.svelte';
 
-    let { measurements = [] } = $props();
+    let { measurements = [], normalizedScores = {} } = $props();
 
     let width = 800;
     let height = 400;
@@ -49,7 +49,7 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <circle 
       cx={xScaleTime(new Date(m.measured_at))} 
-      cy={yScale(m.value)} 
+      cy={yScale(normalizedScores[m.marker_id + '::' + m.measured_at] ?? m.value)}
       r={hoveredData?.created_at ? hoveredData.created_at=== m.created_at ? "7" : "4" : "5"}
       opacity={hoveredData?.created_at ? hoveredData.created_at === m.created_at ? "1" : "0.3" : "1"}
       fill="black"

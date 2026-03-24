@@ -1,33 +1,19 @@
 <script>
-let isitsubmitted = $state(false)
+let { onParamsSubmit } = $props();
+let healthy_min = $state(null);
+let healthy_max = $state(null);
 </script>
 
-<main> 
-    <form id="chart-options-form" onsubmit={() => isitsubmitted = true}>
-        <label for="chart-type-selector">Type: </label>
-        <select name="chart-type-selector" id="chart-type-selector">
-            <option value="">--</option>
-            <option value="derivative">Derivative</option>
-        </select>
-    </form> 
-    
-    <form>
-        <div id="chart-meta-container">
+<main>
+    <form id="chart-meta-container" onsubmit={(e) => { e.preventDefault(); onParamsSubmit({ healthy_min: Number(healthy_min), healthy_max: Number(healthy_max) }); }}>
         <div id="chart-meta">
             <p>Healthy Min:</p>
-            <input type="number">
+            <input type="number" bind:value={healthy_min}>
 
-            <p>Healthy Min:</p>
-            <input type="number">
-
-            <p>Vulnerability Margin:</p>
-            <input type="number">
-
-            <p>Polynomical Degree:</p>
-            <input type="number">
+            <p>Healthy Max:</p>
+            <input type="number" bind:value={healthy_max}>
 
             <button type="submit">Submit</button>
         </div>
-    </div>
     </form>
 </main>
