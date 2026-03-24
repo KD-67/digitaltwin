@@ -9,7 +9,7 @@
 
     let width = 800;
     let height = 400;
-    const margin = {top: 20, bottom: 25, left: 10, right:30};
+    const margin = {top: 20, bottom: 25, left: 10, right:10};
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height -margin.top - margin.bottom;
 
@@ -30,7 +30,7 @@
     );
 
     const yScale = scaleLinear()
-        .domain([45, 85])
+        .domain([-1, 1])
         .range([innerHeight, 0]);
 
 </script>
@@ -39,6 +39,8 @@
 <div id="chart-container">
 <svg {width} {height}>
 <g transform="translate({margin.left} {margin.top})">
+    <rect x="0" y="0" width={innerWidth} height={innerHeight/2} fill="#dffcd2"/>
+    <rect x="0" y={innerHeight/2} width={innerWidth} height={innerHeight/2} fill="#f5cbcf"/>
 
     <Xaxis xScale={xScaleTime} {innerHeight}/>
     <Yaxis {yScale} {innerWidth}/>
@@ -65,9 +67,3 @@
 
 </div>
 </main>
-
-<style>
-    svg {
-        border: 1px solid black;
-    }
-</style>

@@ -1,7 +1,8 @@
 <script>
     import TrajectorySandboxChart from "./trajectory_sandbox_chart_components/sandbox_chart.svelte";
     import SandboxToolbox from "./sandbox_toolbox.svelte";
-    import SandboxDataManager from "./trajectory_sandbox_chart_components/sandbox_data_manager.svelte";
+    import SandboxDataManager from "./sandbox_data_manager.svelte";
+    import DataVisTable from "./data_vis_table.svelte";
 
     let selectedMeasurements = $state([]);
 </script>
@@ -10,7 +11,7 @@
     <h2>Trajectory Sandbox</h2>
 
     <div class="main-container">
-        <div class="subcontainer" id="toolbox-container"> toolbox-container
+        <div class="subcontainer" id="toolbox-container"> Toolbox
             <div id="toolbox">
                 <SandboxToolbox />
             </div>
@@ -21,13 +22,15 @@
                 <TrajectorySandboxChart measurements={selectedMeasurements} />
             </div>
         </div>
-        <div class="subcontainer" id="data-manager-container"> data-manager-container
+        <div class="subcontainer" id="data-manager-container"> Data Manager
             <div id="data-manager">
                 <SandboxDataManager onSelectionChange={(m) => selectedMeasurements = m} />
             </div>
         </div>
-        <div class="subcontainer" id="data-vis-table-container"> data-vis-table-container
-            <div id="data-vis-table"></div>
+        <div class="subcontainer" id="data-vis-table-container"> Data Table
+            <div id="data-vis-table">
+                <DataVisTable measurements={selectedMeasurements} />
+            </div>
         </div>
     </div>
 </main>
@@ -40,10 +43,11 @@
 
 .main-container {
     display: grid;
-    grid-template-rows: 9fr 1fr ;
+    grid-template-rows: 9fr 1fr;
     grid-template-columns: 1fr 5fr 1fr;
     padding: 8px;
     margin-top: 16px;
+    height: calc(80vh - 80px);
 }
 
 .subcontainer {
@@ -63,6 +67,12 @@
 
 #data-manager-container {
     grid-area: 1 / 3 / 2 / 4;
+    overflow: hidden;
+}
+
+#data-manager {
+border: 1px solid black;
+margin: 4px;
 }
 
 #data-vis-table-container {

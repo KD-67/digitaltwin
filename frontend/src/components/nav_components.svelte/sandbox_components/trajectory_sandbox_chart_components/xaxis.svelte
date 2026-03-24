@@ -23,5 +23,4 @@
             >{formatDate(tick)}</text>
         </g>
     {/each}
-    <line x1={0} x2={xScale.range()[1]} y1={innerHeight} y2={innerHeight} stroke="black" />
 </g>
