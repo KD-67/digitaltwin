@@ -15,6 +15,16 @@ function handleSubmit(e) {
     appState.sandboxSubjectId = selectedSubject;
     ensureMeasurementsLoaded(selectedSubject);
 }
+
+function handleClear(e) {
+    e.preventDefault();
+    if (selectedSubject != "") {
+        appState.sandboxSubjectId = null;
+    } else {
+        return;
+    }
+}
+
 </script>
 
 <main>
@@ -29,10 +39,9 @@ function handleSubmit(e) {
         <p>You've chosen: {selectedSubject}</p>
 
         <button type="submit">Submit</button>
+        <button type="button" onclick={handleClear} >Clear</button>
     </form>
 
-    <div>
-        <p>{JSON.stringify(appState.measurementsBySubject[appState.sandboxSubjectId])}</p>
-    </div>
+
     
 </main>
